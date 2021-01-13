@@ -12,18 +12,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  final GlobalKey<ScaffoldState> _scaffoldstate =
-      new GlobalKey<ScaffoldState>();
-
-  void _showBar() {
-    _scaffoldstate.currentState
-        .showSnackBar(new SnackBar(content: new Text('Hello World')));
+  Future _showAlert(BuildContext context, String message) async {
+    return showDialog(
+        context: context,
+        child: new AlertDialog(
+          title: new Text(message),
+          actions: [
+            new FlatButton(
+                onPressed: () => Navigator.pop(context), child: new Text('OK'))
+          ],
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: _scaffoldstate,
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
@@ -32,8 +35,13 @@ class _State extends State<MyApp> {
         padding: new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
-            children: <Widget>[new Text('Hello World'),
-              new RaisedButton(onPressed: _showBar,child:new Text('Click Me!'))
+            children: <Widget>[
+              new Text('Hello World'),
+              new RaisedButton(
+                onPressed: () =>
+                    _showAlert(context, 'Dou you like to Disable the message'),
+                child: new Text('Click Me'),
+              )
             ],
           ),
         ),
