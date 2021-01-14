@@ -12,38 +12,52 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  TextEditingController _user = new TextEditingController();
-  TextEditingController _pass = new TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
       ),
       body: new Container(
-        padding: new EdgeInsets.all(32.0),
+        padding:  new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new Text('Please Login'),
-              new Row(
-                children: [
-                  new Text('Username: ',),
-                  new Expanded(child:new TextField(controller: _user,))
-                ],
+              new Card(
+                child: new Container(
+                  padding: new EdgeInsets.all(32.0),
+                  child: new Column(
+                    children: [
+                      new Text('Hello World'),
+                      new Text('How are you?')
+                    ],
+                  ),
+                ),
               ),
-              new Row(
-                children: [
-                  new Text('Password: ',),
-                  new Expanded(child:new TextField(controller: _pass,obscureText: true,))
-                ],
+              new Card(
+                child: new Container(
+                  padding: new EdgeInsets.all(32.0),
+                  child: new Column(
+                    children: [
+                      new Text('Hello World'),
+                      new Text('How are you?')
+                    ],
+                  ),
+                ),
               ),
-              new Padding(
-                  padding: new EdgeInsets.all(0.0),
-                child: new RaisedButton(onPressed:() => print('Login ${_user.text}'),child: new Text('Click Me')),
-              )
+              new Card(
+                child: new Container(
+                  padding: new EdgeInsets.all(32.0),
+                  child: new Column(
+                    children: [
+                      new Text('Hello World'),
+                      new Text('How are you?')
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
