@@ -12,52 +12,24 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
       ),
       body: new Container(
-        padding:  new EdgeInsets.all(32.0),
+        padding: new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new Card(
-                child: new Container(
-                  padding: new EdgeInsets.all(32.0),
-                  child: new Column(
-                    children: [
-                      new Text('Hello World'),
-                      new Text('How are you?')
-                    ],
-                  ),
-                ),
-              ),
-              new Card(
-                child: new Container(
-                  padding: new EdgeInsets.all(32.0),
-                  child: new Column(
-                    children: [
-                      new Text('Hello World'),
-                      new Text('How are you?')
-                    ],
-                  ),
-                ),
-              ),
-              new Card(
-                child: new Container(
-                  padding: new EdgeInsets.all(32.0),
-                  child: new Column(
-                    children: [
-                      new Text('Hello World'),
-                      new Text('How are you?')
-                    ],
-                  ),
-                ),
-              ),
+              new Text('Image Demo'),
+              new Expanded(child: new Image.asset('images/skyp.jpg')),
+              new Expanded(
+                child: new Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/6/6d/Android_R_%28Developer_Preview_1%29_screenshot.png'),
+              )
             ],
           ),
         ),
