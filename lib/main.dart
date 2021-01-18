@@ -12,9 +12,60 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  String _value = 'Nothing Yet';
 
-  void _onPressed() => setState(() => _value = new DateTime.now().toString());
+  int counter  = 0;
+
+  List<Widget> _list = new List<Widget>();
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    for(int i=0;i<5;i++){
+      Widget child = _newItem(i);
+      _list.add(child);
+    }
+  }
+
+  void _onClicked() {
+    Widget child = _newItem(counter);
+    setState(() {
+      _list.add(child);
+    });
+
+  }
+
+  Widget _newItem(int i) {
+    Key key = new Key('item_${i}');
+    Container  child = new Container(
+      key: key,
+      padding: new EdgeInsets.all(10.0),
+      child: new Chip(
+        label: new Text('${counter} Name here'),
+        deleteIconColor:  Colors.red,
+        deleteButtonTooltipMessage: 'Delete',
+        onDeleted: ()=> _removeItem(key),
+        avatar: new CircleAvatar(
+          backgroundColor: Colors.grey.shade800,
+          child: new Text(i.toString()),
+        ),
+      ),
+    );
+    counter++;
+    return child;
+  }
+
+  void _removeItem(Key key) {
+    for(int i=0;i<_list.length;i++){
+      Widget child = _list.elementAt(i);
+      if(child.key == key){
+        setState(()=>_list.removeAt(i));
+        print('Removing ${key.toString()}');
+      }
+    }
+    counter--;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +74,13 @@ class _State extends State<MyApp> {
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
       ),
+      floatingActionButton: new FloatingActionButton(onPressed: _onClicked,
+      child: new Icon(Icons.add),),
       body: new Container(
         padding: new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
-            children: <Widget>[
-              new Text(_value),
-              new IconButton(
-                icon: new Icon(Icons.timer),
-                onPressed: _onPressed,
-                tooltip: 'Click Me',
-              )
-            ],
+            children: _list,
           ),
         ),
       ),
