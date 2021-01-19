@@ -11,66 +11,71 @@ class MyApp extends StatefulWidget {
   _State createState() => new _State();
 }
 
-class Choice {
-  final String title;
-  final IconData icon;
-
-  const Choice({this.title, this.icon});
-}
-
-class _State extends State<MyApp> with SingleTickerProviderStateMixin {
-  TabController _controller;
-  List<Choice> _items = const <Choice>[
-    const Choice(title: 'CAR', icon: Icons.directions_car),
-    const Choice(title: 'BICYCLE', icon: Icons.directions_bike),
-    const Choice(title: 'BOAT', icon: Icons.directions_boat),
-    const Choice(title: 'TRAIN', icon: Icons.directions_railway),
-    const Choice(title: 'WALK', icon: Icons.directions_walk),
-  ];
+class _State extends State<MyApp> {
+  List<Step> _steps;
+  int _current;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller = new TabController(length: _items.length, vsync: this);
+    _current = 0;
+    _steps = <Step>[
+      new Step(
+          title: new Text('Step 1'),
+          content: new Text('Do SomeThing1'),
+          isActive: true),
+      new Step(
+          title: new Text('Step 2'),
+          content: new Text('Do SomeThing2'),
+          isActive: false),
+      new Step(
+          title: new Text('Step 3'),
+          content: new Text('Do SomeThing3'),
+          isActive: true),
+    ];
+  }
+
+  void _stepContinue() {
+    setState(() {
+      _current++;
+      if (_current >= _steps.length) _current = _steps.length - 1;
+    });
+  }
+
+  void _stepCancel() {
+    setState(() {
+      _current--;
+      if (_current < 0) _current = 0;
+    });
+  }
+
+  void _stepTab(int index) {
+    setState(() {
+      _current = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Name Here'),
-          bottom: new PreferredSize(
-            preferredSize: const Size.fromHeight(48.0),
-            child: new Theme(
-                data: Theme.of(context).copyWith(accentColor: Colors.white),
-                child: new Container(
-                  padding: new EdgeInsets.all(1.0),
-                  height: 48.0,
-                  alignment: Alignment.center,
-                  child: new TabPageSelector(
-                    controller: _controller,
-                  ),
-                )),
-          ),
+      appBar: new AppBar(
+        title: new Text('Name Here'),
+        backgroundColor: Colors.pink,
+      ),
+      body: new Container(
+        padding: new EdgeInsets.all(32.0),
+        child: new Center(
+          child: new Stepper(
+              steps: _steps,
+            type: StepperType.vertical ,
+            onStepCancel: _stepCancel,
+            currentStep: _current,
+            onStepContinue: _stepContinue,
+            onStepTapped: _stepTab,
+          )
         ),
-        body: new TabBarView(
-            controller: _controller,
-            children: _items.map((Choice item) {
-              return new Container(
-                padding: new EdgeInsets.all(25.0),
-                child: new Center(
-                  child: new Column(
-                    children: [
-                      new Text(item.title),
-                      new Icon(
-                        item.icon,
-                        size: 120.0,
-                      )
-                    ],
-                  ),
-                ),
-              );
-            }).toList()));
+      ),
+    );
   }
 }
