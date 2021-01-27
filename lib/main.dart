@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import 'dart:core';
 import 'dart:math';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 void main() {
   runApp(new MaterialApp(
@@ -12,53 +15,39 @@ class MyApp extends StatefulWidget {
   _State createState() => new _State();
 }
 
-class Area {
-  int index;
-  String name;
-  Color color;
+class Sales {
+  String year;
+  int sales;
 
-  Area({this.index: -1, this.name: 'Area', this.color: Colors.lightBlueAccent});
+  Sales(this.year, this.sales);
 }
 
 class _State extends State<MyApp> {
-  int _location;
-  List<Area> _areas;
+  List<Sales> _data;
+
+  List<charts.Series<Sales, String>> _chartData;
+
+  void _makeData() {
+    _data = new List<Sales>();
+    _chartData = new List<charts.Series<Sales, String>>();
+
+    final rnd = new Random();
+    for (int i = 2016; i < 2022; i++) {
+      _data.add(new Sales(i.toString(), rnd.nextInt(1000)));
+    }
+    _chartData.add(new charts.Series(
+        id: "Sales",
+        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+        data: _data,
+        domainFn: (Sales sales, _) => sales.year,
+        measureFn: (Sales sales, _) => sales.sales,
+        fillPatternFn: (_, __) => charts.FillPatternType.solid,
+        displayName: 'sales'));
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
-    _areas = new List<Area>();
-    for (int i = 0; i < 9; i++) {
-      _areas.add(new Area(index: i, name: 'Area ${i}'));
-    }
-    var rang = new Random();
-    _location = rang.nextInt(_areas.length);
-  }
-
-  Widget generate(int index) {
-    return new GridTile(
-        child: new Container(
-      padding: new EdgeInsets.all(5.0),
-      child: new RaisedButton(
-        onPressed: () => _onClicked(index),
-        color: _areas[index].color,
-        child: new Text(
-          _areas[index].name,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    ));
-  }
-
-  void _onClicked(int index) {
-    setState(() {
-      if (index == _location) {
-        _areas[index].color = Colors.green;
-      } else {
-        _areas[index].color = Colors.red;
-      }
-    });
+    _makeData();
   }
 
   @override
@@ -69,15 +58,18 @@ class _State extends State<MyApp> {
         backgroundColor: Colors.pink,
       ),
       body: new Container(
-          padding: new EdgeInsets.all(32.0),
-          child: new Center(
-              child: new GridView.count(
-            crossAxisCount: 4,
-            children: new List<Widget>.generate(
-              _areas.length,
-              generate,
-            ),
-          ))),
+        padding: new EdgeInsets.all(32.0),
+        child: new Center(
+          child: new Column(
+            children: <Widget>[
+              new Text('Sales Data'),
+              new Expanded(
+                child: new charts.BarChart(_chartData)
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
