@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'dart:core';
 import 'dart:math';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -16,47 +14,37 @@ class MyApp extends StatefulWidget {
 }
 
 class Sales {
-  String year;
+  int year;
   int sales;
+  charts.Color color;
 
-  Sales(this.year, this.sales);
+  Sales(this.year, this.sales, this.color);
 }
 
 class _State extends State<MyApp> {
-  List<Sales> _laptop;
-  List<Sales> _desktop;
-
-  List<charts.Series<Sales, String>> _chartData;
+  List<Sales> _data;
+  List<charts.Series<Sales, int>> _chartdata;
 
   void _makeData() {
-    _laptop = new List<Sales>();
-    _desktop = new List<Sales>();
-    _chartData = new List<charts.Series<Sales, String>>();
-    final rnd = new Random();
-    for (int i = 2016; i < 2022; i++) {
-      _laptop.add(new Sales(i.toString(), rnd.nextInt(1000)));
-      _desktop.add(new Sales(i.toString(), rnd.nextInt(1000)));
-    }
-    _chartData.add(new charts.Series(
+    _chartdata = new List<charts.Series<Sales, int>>();
+    _data = <Sales>[
+      new Sales(0, 100, charts.MaterialPalette.red.shadeDefault),
+      new Sales(1, 75, charts.MaterialPalette.blue.shadeDefault),
+      new Sales(2, 25, charts.MaterialPalette.green.shadeDefault),
+      new Sales(3, 5, charts.MaterialPalette.yellow.shadeDefault)
+    ];
+    _chartdata.add(new charts.Series(
         id: 'Sales',
-        data: _laptop,
-        domainFn: (Sales sales, __) => sales.year,
-        measureFn: (Sales sales, __) => sales.sales,
-        displayName: 'Sales',
-        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,));
-    _chartData.add(new charts.Series(
-      id: 'Sales',
-      data: _desktop,
-      domainFn: (Sales sales, __) => sales.year,
-      measureFn: (Sales sales, __) => sales.sales,
-      displayName: 'Sales',
-      colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,));
+        data: _data,
+        colorFn: (Sales sales, _) => sales.color,
+        domainFn: (Sales sales, _) => sales.year,
+        measureFn: (Sales sales, _) => sales.sales));
   }
-
-
 
   @override
   void initState() {
+    // TODO: implement initState
+    super.initState();
     _makeData();
   }
 
@@ -73,7 +61,12 @@ class _State extends State<MyApp> {
           child: new Column(
             children: <Widget>[
               new Text('Sales Data'),
-              new Expanded(child: new charts.BarChart(_chartData))
+              new Expanded(
+                  child: new charts.PieChart(
+                _chartdata,
+                animate: true,
+                animationDuration: new Duration(seconds: 5),
+              ))
             ],
           ),
         ),
