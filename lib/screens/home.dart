@@ -22,7 +22,8 @@ class _HomeState extends State<Home> {
           child: new Column(
             children: <Widget>[
               new Text('Welcome Home'),
-              new RaisedButton(onPressed: ()=>{Navigator.of(context).pushNamed('/Second')}, child: new Text("Next"),)
+              new RaisedButton(onPressed: ()=>{Navigator.of(context).pushNamed('/Second')}, child: new Text("Second"),)
+              new RaisedButton(onPressed: ()=>{Navigator.of(context).pushNamed('/Third')}, child: new Text("Third"),)
             ],
           ),
         ),
