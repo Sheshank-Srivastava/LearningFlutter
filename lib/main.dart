@@ -11,15 +11,42 @@ class MyApp extends StatefulWidget {
   _State createState() => new _State();
 }
 
-class _State extends State<MyApp> {
-  double _x, _y, _z;
-
+class _painter extends CustomPainter {
   @override
-  void initState() {
-    // TODO: implement initState
-    _x = _y = _z = 0.0;
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+
+    final radius = 100.0;
+    final Offset offset = new Offset(0.0, 75.0);
+    final Paint paint = new Paint()
+      ..isAntiAlias = true
+      ..strokeWidth = 10.0
+      ..color = Colors.blue[500]
+      ..style = PaintingStyle.stroke;
+    final Offset bodyStart = new Offset(0.0, 50.0);
+    final Offset bodyEnd = new Offset(0.0, 00.0);
+
+    canvas.drawCircle(offset, radius, paint);
+    canvas.drawLine(bodyStart, bodyEnd, paint);
+
+    final Rect rect = new Rect.fromCircle(center: offset, radius: radius);
+    final Paint rectPaint = new Paint()
+      ..isAntiAlias = true
+      ..strokeWidth = 10.0
+      ..color = Colors.red[500]
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawRect(rect,rectPaint);
   }
 
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    return false;
+  }
+}
+
+class _State extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -32,51 +59,13 @@ class _State extends State<MyApp> {
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new Row(
-                children: [
-                  new Text('X'),
-                  new Slider(
-                    value: _x,
-                    onChanged: (double val) => setState(() {
-                      _x = val;
-                    }),
-                  )
-                ],
+              new Text(
+                'Hello',
+                style:
+                    new TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
               ),
-              new Row(
-                children: [
-                  new Text('Y'),
-                  new Slider(
-                    value: _y,
-                    onChanged: (double val) => setState(() {
-                      _y = val;
-                    }),
-                  )
-                ],
-              ),
-              new Row(
-                children: [
-                  new Text('Z'),
-                  new Slider(
-                    value: _z,
-                    onChanged: (double val) => setState(() {
-                      _z = val;
-                    }),
-                  )
-                ],
-              ),
-              new Transform(
-                transform: new Matrix4.skewY(_y),
-                child: new Transform(
-                  transform: new Matrix4.skewX(_x),
-                  child: new Transform(
-                    transform: new Matrix4.rotationZ(_z),
-                    child: new Padding(
-                      padding: new EdgeInsets.all(10.0),
-                      child: new Text('Hello World'),
-                    ),
-                  ),
-                ),
+              new CustomPaint(
+                painter: new _painter(),
               )
             ],
           ),
