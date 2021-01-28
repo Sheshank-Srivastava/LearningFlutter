@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-
+import  'package:demo_flutter/mywidget.dart';
 
 class Second extends StatefulWidget {
   @override
@@ -23,7 +23,8 @@ class _SecondState extends State<Second> {
             children: <Widget>[
               new Text('Welcome Second'),
               new RaisedButton(onPressed: ()=>{Navigator.of(context).pushNamedAndRemoveUntil('/Third',(Route<dynamic> route)=>false)}, child: new Text("Next"),),
-              new RaisedButton(onPressed: ()=>{Navigator.of(context).pop()}, child: new Text("Back"),)
+              new RaisedButton(onPressed: ()=>{Navigator.of(context).pop()}, child: new Text("Back"),),
+              new MyWidget()
             ],
           ),
         ),
