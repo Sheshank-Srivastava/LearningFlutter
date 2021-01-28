@@ -11,42 +11,32 @@ class MyApp extends StatefulWidget {
   _State createState() => new _State();
 }
 
-class _painter extends CustomPainter {
+class _State extends State<MyApp> with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
+
   @override
-  void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 
-    final radius = 100.0;
-    final Offset offset = new Offset(0.0, 75.0);
-    final Paint paint = new Paint()
-      ..isAntiAlias = true
-      ..strokeWidth = 10.0
-      ..color = Colors.blue[500]
-      ..style = PaintingStyle.stroke;
-    final Offset bodyStart = new Offset(0.0, 50.0);
-    final Offset bodyEnd = new Offset(0.0, 00.0);
+    controller = new AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 5000));
+    animation = new Tween(begin: 0.0, end: 400.0).animate(controller);
+    animation.addListener(() {
+      setState(() {});
+    });
 
-    canvas.drawCircle(offset, radius, paint);
-    canvas.drawLine(bodyStart, bodyEnd, paint);
-
-    final Rect rect = new Rect.fromCircle(center: offset, radius: radius);
-    final Paint rectPaint = new Paint()
-      ..isAntiAlias = true
-      ..strokeWidth = 10.0
-      ..color = Colors.red[500]
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawRect(rect,rectPaint);
+    controller.forward();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // TODO: implement shouldRepaint
-    return false;
+  void dispose() {
+    // TODO: implement dispose
+    controller.dispose();
+    super.dispose();
   }
-}
 
-class _State extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -56,19 +46,13 @@ class _State extends State<MyApp> {
       ),
       body: new Container(
         padding: new EdgeInsets.all(32.0),
+        height:  animation.value,
+        width: animation.value,
         child: new Center(
-          child: new Column(
-            children: <Widget>[
-              new Text(
-                'Hello',
-                style:
-                    new TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
-              ),
-              new CustomPaint(
-                painter: new _painter(),
-              )
-            ],
-          ),
+          child: new FlutterLogo(
+            size: 300.0,
+
+          )
         ),
       ),
     );
