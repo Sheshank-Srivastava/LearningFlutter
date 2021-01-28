@@ -11,32 +11,30 @@ class MyApp extends StatefulWidget {
   _State createState() => new _State();
 }
 
-class _State extends State<MyApp> with SingleTickerProviderStateMixin {
-  Animation<double> animation;
+class _State extends State<MyApp> with TickerProviderStateMixin {
+  Animation animation;
   AnimationController controller;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
     controller = new AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 5000));
-    animation = new Tween(begin: 0.0, end: 400.0).animate(controller);
-    animation.addListener(() {
-      setState(() {});
-    });
+        vsync: this, duration: const Duration(milliseconds: 10000));
+    final CurvedAnimation curve =
+        new CurvedAnimation(parent:   controller, curve: Curves.bounceInOut);
+    animation = new Tween(begin: 0.0, end: 300.0).animate(curve);
 
     controller.forward();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    controller.dispose();
-    super.dispose();
+  Widget builder(BuildContext context,Widget child){
+    return new Container(
+      height: animation.value,
+      width: animation.value,
+      child:  new FlutterLogo(),
+    );
   }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -46,13 +44,8 @@ class _State extends State<MyApp> with SingleTickerProviderStateMixin {
       ),
       body: new Container(
         padding: new EdgeInsets.all(32.0),
-        height:  animation.value,
-        width: animation.value,
         child: new Center(
-          child: new FlutterLogo(
-            size: 300.0,
-
-          )
+          child: new AnimatedBuilder(animation: animation, builder: builder)
         ),
       ),
     );
