@@ -12,6 +12,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> with TickerProviderStateMixin {
+
   Animation animation;
   AnimationController controller;
 
@@ -20,34 +21,44 @@ class _State extends State<MyApp> with TickerProviderStateMixin {
     // TODO: implement initState
     super.initState();
     controller = new AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 10000));
-    final CurvedAnimation curve =
-        new CurvedAnimation(parent:   controller, curve: Curves.bounceInOut);
+        duration: const Duration(milliseconds: 5000), vsync: this);
+    final CurvedAnimation curve = new CurvedAnimation(
+        parent: controller, curve: Curves.easeIn);
     animation = new Tween(begin: 0.0, end: 300.0).animate(curve);
-
+    animation.addStatusListener(listener);
     controller.forward();
   }
 
-  Widget builder(BuildContext context,Widget child){
+  void listener(AnimationStatus status) {
+    if(status == AnimationStatus.completed){
+      controller.reverse();
+    }else if(status == AnimationStatus.dismissed){
+      controller.forward();
+    }
+
+  }
+
+  Widget builder(BuildContext context, Widget child) {
     return new Container(
       height: animation.value,
       width: animation.value,
-      child:  new FlutterLogo(),
+      child: new FlutterLogo(),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Name Here'),
-        backgroundColor: Colors.pink,
-      ),
-      body: new Container(
-        padding: new EdgeInsets.all(32.0),
-        child: new Center(
-          child: new AnimatedBuilder(animation: animation, builder: builder)
+        appBar: new AppBar(
+          title: new Text('Name Here'),
+          backgroundColor: Colors.pink,
         ),
-      ),
+        body: new Container(
+          padding: new EdgeInsets.all(32.0),
+          child: new Center(
+            child: new AnimatedBuilder(animation: animation, builder: builder),
+          ),
+        )
     );
   }
 }
