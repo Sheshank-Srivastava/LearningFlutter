@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'dart:core';
 
 void main() {
   runApp(new MaterialApp(
@@ -14,8 +16,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
+  List<LatLng> points;
   MapController mapController;
-  Map<String, LatLng> coords;
   List<Marker> markers;
 
   @override
@@ -23,37 +25,22 @@ class _State extends State<MyApp> {
     // TODO: implement initState
     super.initState();
     mapController = new MapController();
-    coords = new Map<String, LatLng>();
-    coords.putIfAbsent('Chicago', () => new LatLng(41.8781, -87.6298));
-    coords.putIfAbsent('Detroit', () => new LatLng(42.3314, -83.0458));
-    coords.putIfAbsent('Lansing', () => new LatLng(42.7325, -84.5555));
+    points = new List<LatLng>();
+    points.add(new LatLng(41.8781, -87.6298));
+    points.add(new LatLng(42.8781, -87.6298));
+    points.add(new LatLng(43.8781, -87.6298));
+
     markers = new List<Marker>();
-    for (int i = 0; i < coords.length; i++) {
+    for (int i = 0; i < points.length; i++) {
       markers.add(new Marker(
           width: 80.0,
           height: 80.0,
-          point: coords.values.elementAt(i),
-          builder: (ctx) =>
-          new Icon(
-            Icons.pin_drop,
-            color: Colors.red,
-          )));
+          point: points.elementAt(i),
+          builder: (ctx) => new Icon(
+                Icons.pin_drop,
+                color: Colors.red,
+              )));
     }
-  }
-
-  void _showCord(int index) {
-    mapController.move(coords.values.elementAt(index), 10.0);
-  }
-
-  List<Widget> _makeButtons() {
-    List<Widget> list = new List<Widget>();
-    for(int i=0;i<coords.length;i++) {
-      list.add(new RaisedButton(
-          onPressed: () => _showCord(i),
-          child: new Text(coords.keys.elementAt(i))
-      ));
-    }
-    return list;
   }
 
   @override
@@ -68,9 +55,6 @@ class _State extends State<MyApp> {
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new Row(
-                children: _makeButtons(),
-              ),
               new Flexible(
                 child: new FlutterMap(
                   mapController: mapController,
@@ -79,11 +63,17 @@ class _State extends State<MyApp> {
                   layers: [
                     new TileLayerOptions(
                         urlTemplate:
-                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                         subdomains: ['a', 'b', 'c']),
-                      new MarkerLayerOptions(markers: markers),
+                    new MarkerLayerOptions(markers: markers),
+                    new PolylineLayerOptions(polylines: [
+                      new Polyline(
+                        points: points,
+                        strokeWidth: 4.0,
+                        color: Colors.purple
+                      )
+                    ])
                   ],
-
                 ),
               )
             ],
