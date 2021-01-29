@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong/latlong.dart';
-import 'dart:core';
+import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(new MaterialApp(
@@ -16,30 +14,29 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  List<LatLng> points;
-  MapController mapController;
-  List<Marker> markers;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    mapController = new MapController();
-    points = new List<LatLng>();
-    points.add(new LatLng(41.8781, -87.6298));
-    points.add(new LatLng(42.8781, -87.6298));
-    points.add(new LatLng(43.8781, -87.6298));
+  void _showUrl() {
+    _launch('https://www.google.com');
+  }
 
-    markers = new List<Marker>();
-    for (int i = 0; i < points.length; i++) {
-      markers.add(new Marker(
-          width: 80.0,
-          height: 80.0,
-          point: points.elementAt(i),
-          builder: (ctx) => new Icon(
-                Icons.pin_drop,
-                color: Colors.red,
-              )));
+  void _showEmail() {
+    _launch('mailto:sheshank281198@gmail.com');
+  }
+
+  void _showSMS() {
+    _launch('sms:9350164795');
+
+  }
+
+  void _showTelephone() {
+    _launch('tel:9350164795');
+  }
+
+  void _launch(String urlString) async {
+    if(await canLaunch(urlString)){
+      await launch(urlString);
+    }else{
+      throw 'Could not launch';
     }
   }
 
@@ -51,31 +48,16 @@ class _State extends State<MyApp> {
         backgroundColor: Colors.pink,
       ),
       body: new Container(
-        padding: new EdgeInsets.all(0.0),
+        padding: new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new Flexible(
-                child: new FlutterMap(
-                  mapController: mapController,
-                  options: new MapOptions(
-                      center: new LatLng(41.8781, -87.6298), zoom: 12.0),
-                  layers: [
-                    new TileLayerOptions(
-                        urlTemplate:
-                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                        subdomains: ['a', 'b', 'c']),
-                    new MarkerLayerOptions(markers: markers),
-                    new PolylineLayerOptions(polylines: [
-                      new Polyline(
-                        points: points,
-                        strokeWidth: 4.0,
-                        color: Colors.purple
-                      )
-                    ])
-                  ],
-                ),
-              )
+              new RaisedButton(onPressed: _showUrl, child: new Text('URL')),
+              new RaisedButton(onPressed: _showEmail, child: new Text('Email')),
+              new RaisedButton(onPressed: _showSMS, child: new Text('SMS')),
+              new RaisedButton(onPressed: _showTelephone, child: new Text('TelePhone')),
             ],
           ),
         ),
