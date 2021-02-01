@@ -1,8 +1,25 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:permission/permission.dart';
+import 'package:simple_permissions/simple_permissions.dart';
+import 'package:contacts_service/contacts_service.dart';
 
-void main() {
+Permission permissionFromString(String value) {
+  Permission permission;
+  for (Permission item in Permission.values) {
+    if (item.toString() == value) {
+      permission = item;
+      break;
+    }
+  }
+  return permission;
+}
+
+void main() async {
+  await SimplePermissions.requestPermission(
+      permissionFromString('Permission.ReadContacts'));
+  await SimplePermissions.requestPermission(
+      permissionFromString('Permission.WriteContacts'));
+
   runApp(new MaterialApp(
     home: new MyApp(),
   ));
@@ -14,59 +31,47 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  String status;
-  Permission permission;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    status = 'Select an Item';
-    print('$status ${Permission.channel}');
-  }
-
-  requestPermission() async{
-    bool res = await SimplePermission.requestPermission(permission);
-    print('Permission Results is ${res.toString()}');
-    setState((){
-      status = '${permission.toString()} = ${res.toString()}';
-    });
-  }
-  checkPermission() async{
-    bool res = await SimplePermission.checkPermission(permission);
-    print('Permission Results is ${res.toString()}');
-    setState((){
-      status = '${permission.toString()} = ${res.toString()}';
-    });
-  }
-  getPermissionStatus() async{
-    final res = await SimplePermission.getPermissionStatus(permission);
-    print('Permission Results is ${res.toString()}');
-    setState((){
-      status = '${permission.toString()} = ${res.toString()}';
-    });
+  void _create() async {
+    Contact contact = new Contact(
+        familyName: 'Srivastava',
+        givenName: 'Sheshank',
+        emails: [new Item(label: 'work', value: 'abc@gmail.com')]);
+    await ContactsService.addContact(contact);
+    showInSnackBar('Created contact');
   }
 
-  onDropDownChanged(Permission permission){
-    setState((){
-      this.permission = permission;
-      status = 'Click a button below';
-    });
-    print(permission);
-
+  void _find() async {
+    Iterable<Contact> people =
+        await ContactsService.getContacts(query: 'Sheshank');
+    showInSnackBar('There are ${people.length} people named Sheshank');
   }
-  List<DropdownMenuItem<Permission>> _getDropDownItems(){
-    List<DropdownMenuItem<Permission>> items = new List<DropdownMenuItem<Permission>>();
-    Permission..forEach((permission){
-      var item = new DropdownMenuItem(child:new Text(getPermissionString(permission)),value:permission,);
-      items.add(item);
-    });
-    return items;
+
+  void _read() async {
+    Iterable<Contact> people =
+        await ContactsService.getContacts(query: 'Sheshank');
+    Contact contact = people.first;
+    showInSnackBar('Sheshank email is ${contact.emails.first.value}');
+  }
+
+  void _delete() async {
+    Iterable<Contact> people =
+    await ContactsService.getContacts(query: 'Sheshank');
+    Contact contact = people.first;
+    await ContactsService.deleteContact(contact);
+    showInSnackBar('Sheshank Deleted');
+  }
+
+  void showInSnackBar(String message) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
@@ -78,20 +83,26 @@ class _State extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new Text(status),null
-              new DropdownButton(items:_getDropDownItems(),value: ,),
+              new Text('Contacts'),
               new RaisedButton(
-                onPressed: null,
-                child: new Text('Check Permission'),
-              ),new RaisedButton(
-                onPressed: null,
-                child: new Text('Request Permission'),
-              ),new RaisedButton(
-                onPressed: null,
-                child: new Text('Get Status'),
-              ),new RaisedButton(
-                onPressed: null,
-                child: new Text('Open Setting'),
+                onPressed: _create,
+                child: new Text('Create'),
+              ),
+              new RaisedButton(
+                onPressed: _find,
+                child: new Text('Find'),
+              ),
+              new RaisedButton(
+                onPressed: _read,
+                child: new Text('Read'),
+              ),
+              new RaisedButton(
+                onPressed: _delete,
+                child: new Text('Delete'),
+              ),
+              new RaisedButton(
+                onPressed: SimplePermissions.openSettings,
+                child: new Text('Delete'),
               ),
             ],
           ),
