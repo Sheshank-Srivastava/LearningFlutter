@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:permission/permission.dart';
 
 void main() {
   runApp(new MaterialApp(
@@ -14,30 +14,54 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
+  String status;
+  Permission permission;
 
-  void _showUrl() {
-    _launch('https://www.google.com');
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    status = 'Select an Item';
+    print('$status ${Permission.channel}');
   }
 
-  void _showEmail() {
-    _launch('mailto:sheshank281198@gmail.com');
+  requestPermission() async{
+    bool res = await SimplePermission.requestPermission(permission);
+    print('Permission Results is ${res.toString()}');
+    setState((){
+      status = '${permission.toString()} = ${res.toString()}';
+    });
+  }
+  checkPermission() async{
+    bool res = await SimplePermission.checkPermission(permission);
+    print('Permission Results is ${res.toString()}');
+    setState((){
+      status = '${permission.toString()} = ${res.toString()}';
+    });
+  }
+  getPermissionStatus() async{
+    final res = await SimplePermission.getPermissionStatus(permission);
+    print('Permission Results is ${res.toString()}');
+    setState((){
+      status = '${permission.toString()} = ${res.toString()}';
+    });
   }
 
-  void _showSMS() {
-    _launch('sms:9350164795');
+  onDropDownChanged(Permission permission){
+    setState((){
+      this.permission = permission;
+      status = 'Click a button below';
+    });
+    print(permission);
 
   }
-
-  void _showTelephone() {
-    _launch('tel:9350164795');
-  }
-
-  void _launch(String urlString) async {
-    if(await canLaunch(urlString)){
-      await launch(urlString);
-    }else{
-      throw 'Could not launch';
-    }
+  List<DropdownMenuItem<Permission>> _getDropDownItems(){
+    List<DropdownMenuItem<Permission>> items = new List<DropdownMenuItem<Permission>>();
+    Permission..forEach((permission){
+      var item = new DropdownMenuItem(child:new Text(getPermissionString(permission)),value:permission,);
+      items.add(item);
+    });
+    return items;
   }
 
   @override
@@ -54,10 +78,21 @@ class _State extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new RaisedButton(onPressed: _showUrl, child: new Text('URL')),
-              new RaisedButton(onPressed: _showEmail, child: new Text('Email')),
-              new RaisedButton(onPressed: _showSMS, child: new Text('SMS')),
-              new RaisedButton(onPressed: _showTelephone, child: new Text('TelePhone')),
+              new Text(status),null
+              new DropdownButton(items:_getDropDownItems(),value: ,),
+              new RaisedButton(
+                onPressed: null,
+                child: new Text('Check Permission'),
+              ),new RaisedButton(
+                onPressed: null,
+                child: new Text('Request Permission'),
+              ),new RaisedButton(
+                onPressed: null,
+                child: new Text('Get Status'),
+              ),new RaisedButton(
+                onPressed: null,
+                child: new Text('Open Setting'),
+              ),
             ],
           ),
         ),
