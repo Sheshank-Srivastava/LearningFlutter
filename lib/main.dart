@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:async/async.dart';
+import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:simple_permissions/simple_permissions.dart';
-import 'package:contacts_service/contacts_service.dart';
+
+List<CameraDescription> cameras;
 
 Permission permissionFromString(String value) {
   Permission permission;
@@ -15,10 +18,12 @@ Permission permissionFromString(String value) {
 }
 
 void main() async {
+  cameras = await availableCameras();
+
   await SimplePermissions.requestPermission(
-      permissionFromString('Permission.ReadContacts'));
+      permissionFromString('Permission.WriteExternalStorage'));
   await SimplePermissions.requestPermission(
-      permissionFromString('Permission.WriteContacts'));
+      permissionFromString('Permission.WriteInternalStorage'));
 
   runApp(new MaterialApp(
     home: new MyApp(),
@@ -31,47 +36,64 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  CameraController controller;
+  final GlobalKey<ScaffoldState> key = new GlobalKey();
+  Permission _permissionCamera;
+  Permission _permissionStorage;
 
-  void _create() async {
-    Contact contact = new Contact(
-        familyName: 'Srivastava',
-        givenName: 'Sheshank',
-        emails: [new Item(label: 'work', value: 'abc@gmail.com')]);
-    await ContactsService.addContact(contact);
-    showInSnackBar('Created contact');
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    controller = new CameraController(cameras[0], ResolutionPreset.medium);
+    controller.initialize().then((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
   }
 
-  void _find() async {
-    Iterable<Contact> people =
-        await ContactsService.getContacts(query: 'Sheshank');
-    showInSnackBar('There are ${people.length} people named Sheshank');
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    controller?.dispose();
+    super.dispose();
   }
 
-  void _read() async {
-    Iterable<Contact> people =
-        await ContactsService.getContacts(query: 'Sheshank');
-    Contact contact = people.first;
-    showInSnackBar('Sheshank email is ${contact.emails.first.value}');
+  Future<String> saveImage() async {
+    String timeStamp = new DateTime.now().millisecondsSinceEpoch.toString();
+    String filePath = '/sdcard/Pictures/${timeStamp}.jpg';
+
+    if (controller.value.isTakingPicture) return null;
+    try {
+      await controller.takePicture();
+    } on CameraException catch (e) {
+      showInSnckBar(e.toString());
+    }
+    return filePath;
   }
 
-  void _delete() async {
-    Iterable<Contact> people =
-    await ContactsService.getContacts(query: 'Sheshank');
-    Contact contact = people.first;
-    await ContactsService.deleteContact(contact);
-    showInSnackBar('Sheshank Deleted');
+  void takePicture() async {
+    bool hasCamera = await SimplePermissions.checkPermission(_permissionCamera);
+    bool hasStorage =
+        await SimplePermissions.checkPermission(_permissionStorage);
+    if (!hasStorage || !hasCamera) {
+      showInSnckBar('Lacking permissio to take a pictue');
+      return;
+    }
+    saveImage().then((String filePath) {
+      if (mounted && filePath!=null) showInSnckBar('picture Saved to ${filePath}');
+    });
   }
 
-  void showInSnackBar(String message) {
-    _scaffoldKey.currentState
-        .showSnackBar(new SnackBar(content: new Text(message)));
+  void showInSnckBar(String message) {
+    key.currentState.showSnackBar(new SnackBar(content: new Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: _scaffoldKey,
+      key: key,
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
@@ -83,27 +105,20 @@ class _State extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new Text('Contacts'),
-              new RaisedButton(
-                onPressed: _create,
-                child: new Text('Create'),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  new RaisedButton(
+                      onPressed: takePicture, child: new Text('Take Picture')),
+                  new RaisedButton(
+                      onPressed: SimplePermissions.openSettings,
+                      child: new Text('Setting'))
+                ],
               ),
-              new RaisedButton(
-                onPressed: _find,
-                child: new Text('Find'),
-              ),
-              new RaisedButton(
-                onPressed: _read,
-                child: new Text('Read'),
-              ),
-              new RaisedButton(
-                onPressed: _delete,
-                child: new Text('Delete'),
-              ),
-              new RaisedButton(
-                onPressed: SimplePermissions.openSettings,
-                child: new Text('Delete'),
-              ),
+              new AspectRatio(
+                  aspectRatio: 1.0, child: new CameraPreview(controller)),
+              new Text('Hello World')
             ],
           ),
         ),
