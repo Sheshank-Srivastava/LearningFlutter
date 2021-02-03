@@ -1,30 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:async/async.dart';
+import 'dart:async';
 import 'dart:io';
-import 'package:camera/camera.dart';
-import 'package:simple_permissions/simple_permissions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-List<CameraDescription> cameras;
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-Permission permissionFromString(String value) {
-  Permission permission;
-  for (Permission item in Permission.values) {
-    if (item.toString() == value) {
-      permission = item;
-      break;
-    }
-  }
-  return permission;
-}
-
-void main() async {
-  cameras = await availableCameras();
-
-  await SimplePermissions.requestPermission(
-      permissionFromString('Permission.WriteExternalStorage'));
-  await SimplePermissions.requestPermission(
-      permissionFromString('Permission.WriteInternalStorage'));
-
+void main() {
   runApp(new MaterialApp(
     home: new MyApp(),
   ));
@@ -36,64 +20,41 @@ class MyApp extends StatefulWidget {
 }
 
 class _State extends State<MyApp> {
-  CameraController controller;
-  final GlobalKey<ScaffoldState> key = new GlobalKey();
-  Permission _permissionCamera;
-  Permission _permissionStorage;
+  String _status;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    controller = new CameraController(cameras[0], ResolutionPreset.medium);
-    controller.initialize().then((_) {
-      if (!mounted) return;
+    Firebase.initializeApp().whenComplete(() {
+      print("completed");
       setState(() {});
     });
+    _status = 'Not Authenticated';
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    controller?.dispose();
-    super.dispose();
-  }
-
-  Future<String> saveImage() async {
-    String timeStamp = new DateTime.now().millisecondsSinceEpoch.toString();
-    String filePath = '/sdcard/Pictures/${timeStamp}.jpg';
-
-    if (controller.value.isTakingPicture) return null;
-    try {
-      await controller.takePicture();
-    } on CameraException catch (e) {
-      showInSnckBar(e.toString());
+  void _signInAnon() async {
+    UserCredential user = await _auth.signInAnonymously();
+    if (user != null && user.user.isAnonymous) {
+      setState(() {
+        _status = 'Signed in Anonymously';
+      });
+    } else {
+      _status = 'Signed in Failed!';
     }
-    return filePath;
   }
 
-  void takePicture() async {
-    bool hasCamera = await SimplePermissions.checkPermission(_permissionCamera);
-    bool hasStorage =
-        await SimplePermissions.checkPermission(_permissionStorage);
-    if (!hasStorage || !hasCamera) {
-      showInSnckBar('Lacking permissio to take a pictue');
-      return;
-    }
-    saveImage().then((String filePath) {
-      if (mounted && filePath!=null) showInSnckBar('picture Saved to ${filePath}');
+  void _signOut() async {
+
+    await _auth.signOut();
+    setState((){
+      _status = 'Signed Out';
     });
-  }
-
-  void showInSnckBar(String message) {
-    key.currentState.showSnackBar(new SnackBar(content: new Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: key,
       appBar: new AppBar(
         title: new Text('Name Here'),
         backgroundColor: Colors.pink,
@@ -102,24 +63,15 @@ class _State extends State<MyApp> {
         padding: new EdgeInsets.all(32.0),
         child: new Center(
           child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              new Row(
+            children: <Widget>[new Text(_status)
+            ,new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  new RaisedButton(
-                      onPressed: takePicture, child: new Text('Take Picture')),
-                  new RaisedButton(
-                      onPressed: SimplePermissions.openSettings,
-                      child: new Text('Setting'))
+                  new RaisedButton(onPressed: _signOut,child: new Text('SignOut'),),
+                  new RaisedButton(onPressed: _signInAnon,child: new Text('Sign-in Anon'),),
                 ],
-              ),
-              new AspectRatio(
-                  aspectRatio: 1.0, child: new CameraPreview(controller)),
-              new Text('Hello World')
-            ],
+              )],
           ),
         ),
       ),
